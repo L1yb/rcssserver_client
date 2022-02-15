@@ -1,2 +1,0 @@
-/usr/bin/ar qc libCONFIG.a  CMakeFiles/CONFIG.dir/builder.cpp.o CMakeFiles/CONFIG.dir/parser.cpp.o CMakeFiles/CONFIG.dir/statushandler.cpp.o CMakeFiles/CONFIG.dir/streamstatushandler.cpp.o
-/usr/bin/ranlib libCONFIG.a

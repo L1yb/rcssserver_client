@@ -1,3 +1,0 @@
-/home/l1yb/robocup2d/rcssserver_client/build/CMakeFiles/rebuild_cache.dir
-/home/l1yb/robocup2d/rcssserver_client/build/CMakeFiles/client.dir
-/home/l1yb/robocup2d/rcssserver_client/build/CMakeFiles/edit_cache.dir
