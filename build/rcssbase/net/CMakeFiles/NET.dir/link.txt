@@ -1,0 +1,2 @@
+/usr/bin/ar qc libNET.a  CMakeFiles/NET.dir/addr.cpp.o CMakeFiles/NET.dir/handler.cpp.o CMakeFiles/NET.dir/socket.cpp.o CMakeFiles/NET.dir/socketstreambuf.cpp.o CMakeFiles/NET.dir/tcpsocket.cpp.o CMakeFiles/NET.dir/udpsocket.cpp.o
+/usr/bin/ranlib libNET.a

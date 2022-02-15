@@ -1,0 +1,2 @@
+/usr/bin/ar qc libGZIP.a  CMakeFiles/GZIP.dir/gzfstream.cpp.o CMakeFiles/GZIP.dir/gzstream.cpp.o
+/usr/bin/ranlib libGZIP.a
