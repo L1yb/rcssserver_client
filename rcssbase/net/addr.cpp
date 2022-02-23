@@ -38,7 +38,7 @@
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif1
+#endif
 
 #ifdef __CYGWIN__
 // cygwin is not win32

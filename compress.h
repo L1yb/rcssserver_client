@@ -34,6 +34,7 @@
 #include "config.h"
 #endif
 
+
 #ifdef HAVE_LIBZ
 
 #include <zlib.h>
@@ -46,109 +47,110 @@ class Compressor
 protected:
     z_stream M_stream;
 
-    char *M_out_buffer;
+    char* M_out_buffer;
     int M_out_size;
     int M_out_avail;
 
 public:
-    Compressor(int level = Z_DEFAULT_COMPRESSION,
-               int strategy = Z_DEFAULT_STRATEGY)
-        : M_out_buffer(NULL),
-          M_out_size(0),
-          M_out_avail(0)
-    {
-        M_stream.zalloc = Z_NULL;
-        M_stream.zfree = Z_NULL;
-        M_stream.opaque = NULL;
+    Compressor( int level = Z_DEFAULT_COMPRESSION,
+                int strategy = Z_DEFAULT_STRATEGY )
+        : M_out_buffer( NULL ),
+          M_out_size( 0 ),
+          M_out_avail( 0 )
+      {
+          M_stream.zalloc = Z_NULL;
+          M_stream.zfree = Z_NULL;
+          M_stream.opaque = NULL;
 
-        deflateInit(&M_stream, level);
-        deflateParams(&M_stream, level, strategy);
-    }
+          deflateInit( &M_stream, level );
+          deflateParams( &M_stream, level, strategy );
+
+      }
 
     ~Compressor()
-    {
-        deflateEnd(&M_stream);
-        free(M_out_buffer);
-    }
+      {
+          deflateEnd( &M_stream );
+          free( M_out_buffer );
+      }
 
-    int setCompression(int level = Z_DEFAULT_COMPRESSION,
-                       int strategy = Z_DEFAULT_STRATEGY)
-    {
-        return deflateParams(&M_stream, level, strategy);
-    }
+    int setCompression( int level = Z_DEFAULT_COMPRESSION,
+                        int strategy =  Z_DEFAULT_STRATEGY )
+      {
+          return deflateParams( &M_stream, level, strategy );
+      }
 
     int reset()
-    {
-        return deflateReset(&M_stream);
-    }
+      {
+          return deflateReset( &M_stream );
+      }
 
-    int compress(const char *in_buffer, int in_size, int z_flush = Z_NO_FLUSH)
-    {
-        if (M_out_buffer == NULL)
-        {
-            M_out_avail = (int)(in_size * 1.01 + 12);
-            M_out_buffer = (char *)malloc(M_out_avail);
-            if (M_out_buffer == NULL)
-                return Z_MEM_ERROR;
+    int compress( const char* in_buffer, int in_size, int z_flush = Z_NO_FLUSH )
+      {
+          if( M_out_buffer == NULL )
+          {
+              M_out_avail = (int)(in_size * 1.01 + 12);
+              M_out_buffer = (char*)malloc( M_out_avail );
+              if( M_out_buffer == NULL )
+                  return Z_MEM_ERROR;
 
-            M_stream.next_out = (Bytef *)M_out_buffer;
-            M_stream.avail_out = M_out_avail;
-        }
+              M_stream.next_out = (Bytef*)M_out_buffer;
+              M_stream.avail_out = M_out_avail;
+          }
 
-        M_stream.next_in = (Bytef *)in_buffer;
-        M_stream.avail_in = in_size;
+          M_stream.next_in = (Bytef*)in_buffer;
+          M_stream.avail_in = in_size;
 
-        int bytes_out = M_stream.total_out;
+          int bytes_out = M_stream.total_out;
 
-        int err;
-        for (;;)
-        {
-            if (M_stream.avail_out == 0)
-            {
-                int extra = (int)(M_out_avail * 0.5);
-                M_out_buffer = (char *)realloc(M_out_buffer, M_out_avail + extra);
-                if (M_out_buffer == NULL)
-                {
-                    err = Z_MEM_ERROR;
-                    break;
-                }
+          int err;
+          for(;;)
+          {
+              if( M_stream.avail_out == 0 )
+              {
+                  int extra = (int)(M_out_avail * 0.5);
+                  M_out_buffer = (char*)realloc( M_out_buffer, M_out_avail + extra );
+                  if( M_out_buffer == NULL )
+                  {
+                      err = Z_MEM_ERROR;
+                      break;
+                  }
 
-                M_stream.next_out = (Bytef *)(M_out_buffer + M_out_avail);
-                M_stream.avail_out += extra;
-                M_out_avail += extra;
-            }
+                  M_stream.next_out = (Bytef*)( M_out_buffer + M_out_avail );
+                  M_stream.avail_out += extra;
+                  M_out_avail += extra;
+              }
 
-            err = deflate(&M_stream, z_flush);
-            if (err != Z_OK)
-                break;
-        }
+              err = deflate( &M_stream, z_flush );
+              if( err != Z_OK )
+                  break;
+          }
 
-        M_out_size += M_stream.total_out - bytes_out;
-        return err;
-    }
+          M_out_size += M_stream.total_out - bytes_out;
+          return err;
+      }
 
-    int getOutput(char *&out, int &size, bool detach = false)
-    {
-        out = M_out_buffer;
-        size = M_out_size;
+    int getOutput( char*& out, int& size, bool detach = false )
+      {
+          out = M_out_buffer;
+          size = M_out_size;
 
-        if (detach)
-        {
-            out = (char *)realloc(out, size);
-            if (out == NULL)
-                return Z_MEM_ERROR;
+          if( detach )
+          {
+              out = (char*)realloc( out, size );
+              if( out == NULL )
+                  return Z_MEM_ERROR;
 
-            M_out_buffer = NULL;
-            M_out_avail = 0;
-        }
+              M_out_buffer = NULL;
+              M_out_avail = 0;
+          }
 
-        M_out_size = 0;
-        deflateReset(&M_stream);
-        M_stream.next_out = (Bytef *)M_out_buffer;
-        M_stream.avail_out = M_out_avail;
+          M_out_size = 0;
+          deflateReset( &M_stream );
+          M_stream.next_out = (Bytef*)M_out_buffer;
+          M_stream.avail_out = M_out_avail;
 
-        return Z_OK;
-    }
+          return Z_OK;
+      }
 };
 
 class Decompressor
@@ -156,100 +158,102 @@ class Decompressor
 protected:
     z_stream M_stream;
 
-    char *M_out_buffer;
+    char* M_out_buffer;
     int M_out_size;
     int M_out_avail;
 
 public:
     Decompressor()
-        : M_out_buffer(NULL),
-          M_out_size(0),
-          M_out_avail(0)
-    {
-        M_stream.zalloc = Z_NULL;
-        M_stream.zfree = Z_NULL;
-        M_stream.opaque = NULL;
+        : M_out_buffer( NULL ),
+          M_out_size( 0 ),
+          M_out_avail( 0 )
+      {
+          M_stream.zalloc = Z_NULL;
+          M_stream.zfree = Z_NULL;
+          M_stream.opaque = NULL;
 
-        inflateInit(&M_stream);
-    }
+          inflateInit( &M_stream );
+      }
 
     ~Decompressor()
-    {
-        inflateEnd(&M_stream);
-        free(M_out_buffer);
-    }
+      {
+          inflateEnd( &M_stream );
+          free( M_out_buffer );
+      }
 
-    int decompress(const char *in_buffer,
-                   int in_size,
-                   int z_flush = Z_NO_FLUSH)
-    {
-        if (M_out_buffer == NULL)
-        {
-            M_out_avail = in_size * 2;
-            M_out_buffer = (char *)malloc(M_out_avail);
-            if (M_out_buffer == NULL)
-                return Z_MEM_ERROR;
+    int decompress( const char* in_buffer,
+                    int in_size,
+                    int z_flush = Z_NO_FLUSH )
+      {
+          if( M_out_buffer == NULL )
+          {
+              M_out_avail = in_size * 2;
+              M_out_buffer = (char*)malloc( M_out_avail );
+              if( M_out_buffer == NULL )
+                  return Z_MEM_ERROR;
 
-            M_stream.next_out = (Bytef *)M_out_buffer;
-            M_stream.avail_out = M_out_avail;
-        }
+              M_stream.next_out = (Bytef*)M_out_buffer;
+              M_stream.avail_out = M_out_avail;
+          }
 
-        M_stream.next_in = (Bytef *)in_buffer;
-        M_stream.avail_in = in_size;
+          M_stream.next_in = (Bytef*)in_buffer;
+          M_stream.avail_in = in_size;
 
-        int bytes_out = M_stream.total_out;
+          int bytes_out = M_stream.total_out;
 
-        int err;
-        for (;;)
-        {
-            if (M_stream.avail_out == 0)
-            {
-                int extra = (int)(M_out_avail * 0.5);
-                M_out_buffer = (char *)realloc(M_out_buffer,
-                                               M_out_avail + extra);
-                if (M_out_buffer == NULL)
-                {
-                    err = Z_MEM_ERROR;
-                    break;
-                }
+          int err;
+          for(;;)
+          {
+              if( M_stream.avail_out == 0 )
+              {
+                  int extra = (int)(M_out_avail * 0.5);
+                  M_out_buffer = (char*)realloc( M_out_buffer,
+                                                 M_out_avail + extra );
+                  if( M_out_buffer == NULL )
+                  {
+                      err = Z_MEM_ERROR;
+                      break;
+                  }
 
-                M_stream.next_out = (Bytef *)(M_out_buffer + M_out_avail);
-                M_stream.avail_out += extra;
-                M_out_avail += extra;
-            }
+                  M_stream.next_out = (Bytef*)( M_out_buffer + M_out_avail );
+                  M_stream.avail_out += extra;
+                  M_out_avail += extra;
+              }
 
-            err = inflate(&M_stream, z_flush);
-            if (err != Z_OK)
-                break;
-        }
+              err = inflate( &M_stream, z_flush );
+              if( err != Z_OK )
+                  break;
+          }
 
-        M_out_size = M_stream.total_out - bytes_out;
-        return err;
-    }
+          M_out_size = M_stream.total_out - bytes_out;
+          return err;
+      }
 
-    int getOutput(char *&out, int &size, bool detach = false)
-    {
-        out = M_out_buffer;
-        size = M_out_size;
+    int getOutput( char*& out, int& size, bool detach = false )
+      {
+          out = M_out_buffer;
+          size = M_out_size;
 
-        if (detach)
-        {
-            out = (char *)realloc(out, size);
-            if (out == NULL)
-                return Z_MEM_ERROR;
+          if( detach )
+          {
+              out = (char*)realloc( out, size );
+              if( out == NULL )
+                  return Z_MEM_ERROR;
 
-            M_out_buffer = NULL;
-            M_out_avail = 0;
-        }
+              M_out_buffer = NULL;
+              M_out_avail = 0;
+          }
 
-        M_out_size = 0;
-        inflateReset(&M_stream);
-        M_stream.next_out = (Bytef *)M_out_buffer;
-        M_stream.avail_out = M_out_avail;
+          M_out_size = 0;
+          inflateReset( &M_stream );
+          M_stream.next_out = (Bytef*)M_out_buffer;
+          M_stream.avail_out = M_out_avail;
 
-        return Z_OK;
-    }
+          return Z_OK;
+      }
 };
+
+
 
 #endif // HAVE_LIBZ
 
