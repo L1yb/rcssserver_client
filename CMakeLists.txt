@@ -1,36 +1,45 @@
-cmake_minimum_required(VERSION 2.6)
-PROJECT(CLIENT)
+cmake_minimum_required(VERSION 3.5)
 
-aux_source_directory(. DIR_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/rcssbase/gzip GZIP)
-aux_source_directory(${PROJECT_SOURCE_DIR}/rcssbase/net  NET)
+project(client VERSION 0.1.1)
 
-add_executable(client ${DIR_SRCS} ${GZIP} ${NET}) 
+aux_source_directory(${PROJECT_SOURCE_DIR}/rcssbase/net NET )
+aux_source_directory(${PROJECT_SOURCE_DIR}/rcssbase/gzip GZIP )
 
 add_definitions(-DHAVE_CONFIG_H)
 
-target_include_directories(client
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/rcssbase/gzip
-    ${PROJECT_SOURCE_DIR}/rcssbase/net
+add_executable(
+    ${PROJECT_NAME} 
+    ${NET}
+    ${GZIP}
+    client.cpp 
     )
 
-# boost
-find_package(Boost 1.36.0 COMPONENTS system REQUIRED)
-if(NOT Boost_FOUND)
-  message(FATAL_ERROR "Boost not found!")
+target_include_directories(client 
+    PUBLIC
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/rcssbase/net
+    ${PROJECT_SOURCE_DIR}/rcssbase/gzip
+
+)
+    
+
+# check boost
+find_package(Boost 1.38.0 COMPONENTS program_options system REQUIRED)
+if(Boost_PROGRAM_OPTIONS_FOUND)
+  set(HAVE_BOOST_PROGRAM_OPTIONS TRUE)
 endif()
 
-# zlib
+# check zlib
 find_package(ZLIB)
 if(ZLIB_FOUND)
-  #add_definitions(-DHAVE_LIBZ)
   set(HAVE_LIBZ TRUE)
 endif()
 
-target_link_libraries(client
+target_link_libraries(client 
     PUBLIC
     Boost::system
     ZLIB::ZLIB
-  )
+)
+
+# install(TARGETS client DESTINATION bin)
+
