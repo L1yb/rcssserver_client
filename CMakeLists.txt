@@ -19,7 +19,6 @@ target_include_directories(client
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/rcssbase/net
     ${PROJECT_SOURCE_DIR}/rcssbase/gzip
-
 )
     
 
